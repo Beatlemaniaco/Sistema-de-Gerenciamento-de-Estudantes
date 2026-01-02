@@ -3,29 +3,31 @@ using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.Linq.Expressions;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace SistemaEstudante
 {
     abstract class Pessoa
     {
-        private int id = 0;
-        private string nome_completo;
-        private string cpf;
-        private DateTime data_de_nascimento;
-        private string email;
-        private int telefone;
-        private string endereco;
-        private DateTime data_cadastro;
-        private status Status;
-        private sexo Sexo;
-        private enum status
+        public int Id {get; private set;}
+        public string NomeCompleto {get; private set;}
+        public string Cpf {get; private set;}
+        public DateTime DataDeNascimento {get; private set;}
+        public string Email {get; private set;}
+        public string Telefone {get; private set;}
+        public string Endereco {get; private set;}
+        public DateTime DataDeCadastro {get; private set;}
+        public status Status {get; private set;}
+        public sexo Sexo {get; private set;}
+        public enum status
         {
             ATIVO = 1,
             INATIVO = 2,
             BLOQUEADO = 3
         }
-        private enum sexo
+        public enum sexo
         {
              Masculino = 1,
              Feminino = 2,
@@ -33,45 +35,97 @@ namespace SistemaEstudante
              Não_Informado = 4
         }
 
-        public int Id
+        public (bool valido, string erro) ValidarId(string entrada)
         {
-            get {return id;}
-            set {
-                if (value < 0)
-                {
-                    throw new ArgumentException("Números negativos não são permitidos!!!!!");
-                }
-                id = value;}
+            if (string.IsNullOrWhiteSpace(entrada))
+            {
+                return(false, "O campo não pode ficar vazio.");
+            }
+            if (!int.TryParse(entrada, out int id))
+            {
+                return (false, "Tem que ser um número inteiro.");
+            }
+            if (id < 0)
+            {
+                return(false, "O ID não pode ser negativo.");
+            }
+
+            Id = id;
+            return(true, null);
         }
-        public string NomeCompleto
+
+        public (bool valido, string erro) ValidarNomeCompleto(string entrada)
         {
-            get {return nome_completo;}
-            set {nome_completo = value;}
+            entrada = entrada.Trim();
+
+            if (string.IsNullOrWhiteSpace(entrada))
+            {
+                return(false, "O Campo não pode ficar vazio");
+
+            }
+            if (entrada.Length > 50)
+            {
+                return(false, "Você ultrapassou o limite de caracteres");
+            }
+            if (!Regex.IsMatch(entrada, @"^[\p{L}\p{M}\s]+$"))
+            {
+                return (false, "Somente letras são perimitidas");
+            }
+
+            NomeCompleto = entrada;
+            return(true, null);
         }
-        public string Cpf
+
+        public (bool valido, string erro) ValidarCpf(string entrada)
         {
-            get {return cpf;}
-            set {cpf = value;}
+            entrada = entrada.Trim();
+
+            if (string.IsNullOrWhiteSpace(entrada))
+            {
+                return(false, "O campo não pode ficar vazio.");
+            }
+            if (entrada.Length > 14 || entrada.Length < 14)
+            {
+                return(false, "Tamanho invalido.");
+            }
+            if (!Regex.IsMatch(entrada, @"^([0-9]{3}).([0-9]{3}).([0-9]{3})-([0-9]{2})$"))
+            {
+                return(false, "Formato invalido.");
+            }
+
+            Cpf = entrada;
+            return(true, null);
         }
-        public DateTime DataDeNascimento
+    }
+
+    class Aluno : Pessoa
+    {
+        private int matricula;
+        private string curso;
+        private string periodo;
+        private DateTime data_cadastro;
+        private status Status;
+        private List<Materia> materias;
+        private Dictionary<Materia, double> notas;
+        private double MediaGeral;
+        private bool estado_matricula;
+
+        private enum status
         {
-            get {return data_de_nascimento;}
-            set {data_de_nascimento = value;}
+            ATIVO = 1,
+            INATIVO = 2,
+            BLOQUEADO = 3
         }
-        public string Email
+
+        public int Matricula
         {
-            get {return email;}
-            set {email = value;}
+            get {return matricula;}
+            set {matricula = value;}
         }
-        public int Telefone
+        public string Curso
         {
-            get {return telefone;}
-            set {telefone = value;}
-        }
-        public string Endereco
-        {
-            get {return endereco;}
-            set {endereco = value;}
+            get {return Curso;}
+            set {curso = value;}
         }
         public DateTime DataCadastro
         {
@@ -82,14 +136,5 @@ namespace SistemaEstudante
         {
             get => Status.ToString();
         }
-        public string SexoDescrição
-        {
-            get => Sexo.ToString();
-        }
-    }
-
-    class Aluno : Pessoa
-    {
-        
     }
 }

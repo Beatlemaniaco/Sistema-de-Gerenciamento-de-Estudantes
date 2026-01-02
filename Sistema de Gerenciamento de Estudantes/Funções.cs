@@ -12,5 +12,21 @@ namespace SistemaEstudante
             }
             return variavel;
         }
+
+        public static void ExecutarValidador(Func<string, (bool valido, string erro)>validar)
+        {
+            bool valido;
+            do{
+                string entrada = Console.ReadLine();
+                var resultado = validar(entrada);
+
+                valido = resultado.valido;
+
+                if (!resultado.valido)
+                {
+                    Console.WriteLine(resultado.erro);
+                }
+            } while (!valido);
+        }
     }
 }
