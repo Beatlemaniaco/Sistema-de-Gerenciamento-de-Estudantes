@@ -2,21 +2,13 @@ using System;
 
 namespace SistemaEstudante
 {
-    public class Função
+    public class Funções
     {
-        public static int ValidarInteiro(string entrada)
-        {
-            if (!int.TryParse(entrada, out int variavel))
-            {
-                throw new ("Dado Invalido");
-            }
-            return variavel;
-        }
-
-        public static void ExecutarValidador(Func<string, (bool valido, string erro)>validar)
+        public static void ExecutarValidador(string pergunta, Func<string, (bool valido, string erro)>validar)
         {
             bool valido;
             do{
+                Console.WriteLine(pergunta);
                 string entrada = Console.ReadLine();
                 var resultado = validar(entrada);
 
